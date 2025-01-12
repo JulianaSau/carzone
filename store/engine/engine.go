@@ -14,11 +14,11 @@ type EngineStore struct {
 	db *sql.DB
 }
 
-func new(db *sql.DB) *EngineStore {
+func New(db *sql.DB) *EngineStore {
 	return &EngineStore{db: db}
 }
 
-func (e *EngineStore) EngineById(ctx context.Context, id string) (models.Engine, error) {
+func (e *EngineStore) GetEngineById(ctx context.Context, id string) (models.Engine, error) {
 	var engine models.Engine
 
 	tx, err := e.db.BeginTx(ctx, nil)
