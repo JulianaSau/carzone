@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/JulianaSau/carzone/driver"
 	carHandler "github.com/JulianaSau/carzone/handler/car"
@@ -31,6 +33,9 @@ func main() {
 	defer driver.CloseDB()
 
 	db := driver.GetDB()
+	// if db == nil {
+	// 	log.Fatal("Could not connect to the database")
+	// }
 
 	// create a new car store instance and a new car service instance using the db instance
 	carStore := carStore.New(db)
@@ -46,21 +51,21 @@ func main() {
 	router := mux.NewRouter()
 
 	// execute schema file to populate database
-	schemaFile := "store/schema.sql"
-	if err := executeSchemaFile(db, schemaFile); err != nil {
-		log.Fatalf("Error while executing schema file: %v", err)
-	}
+	// schemaFile := "store/schema.sql"
+	// if err := executeSchemaFile(db, schemaFile); err != nil {
+	// 	log.Fatalf("Error while executing schema file: %v", err)
+	// }
 
 	// define routes
 	router.HandleFunc("/api/v1/cars/{id}", carHandler.GetCarById).Methods("GET")
 	router.HandleFunc("/api/v1/cars", carHandler.GetCarByBrand).Methods("GET")
 	router.HandleFunc("/api/v1/cars", carHandler.CreateCar).Methods("POST")
-	router.HandleFunc("/api/v1/cars/{id}", carHandler.UpdateCar).Methods("UPDATE")
+	router.HandleFunc("/api/v1/cars/{id}", carHandler.UpdateCar).Methods("PUT")
 	router.HandleFunc("/api/v1/cars/{id}", carHandler.DeleteCar).Methods("DELETE")
 
 	router.HandleFunc("/api/v1/engines/{id}", engineHandler.GetEngineById).Methods("GET")
 	router.HandleFunc("/api/v1/engines", engineHandler.CreateEngine).Methods("POST")
-	router.HandleFunc("/api/v1/engines/{id}", engineHandler.UpdateEngine).Methods("UPDATE")
+	router.HandleFunc("/api/v1/engines/{id}", engineHandler.UpdateEngine).Methods("PUT")
 	router.HandleFunc("/api/v1/engines/{id}", engineHandler.DeleteEngine).Methods("DELETE")
 
 	// start the server
@@ -75,13 +80,28 @@ func main() {
 }
 
 func executeSchemaFile(db *sql.DB, fileName string) error {
-	sqlFile, err := os.ReadFile(fileName)
-	if err != nil {
-		return err
+	if db == nil {
+		return fmt.Errorf("database connection is nil")
 	}
+
+	// Use filepath for cross-platform compatibility
+	schemaPath := filepath.Clean(fileName)
+
+	// Read the schema file
+	sqlFile, err := os.ReadFile(schemaPath)
+	if err != nil {
+		return fmt.Errorf("failed to read schema file '%s': %w", schemaPath, err)
+	}
+
+	// Normalize line endings
+	sqlFile = bytes.ReplaceAll(sqlFile, []byte("\r\n"), []byte("\n"))
+
+	// Execute the SQL commands
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to execute schema file '%s': %w", schemaPath, err)
 	}
+
+	log.Printf("Successfully executed schema file: %s", schemaPath)
 	return nil
 }
