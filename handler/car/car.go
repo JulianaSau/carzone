@@ -167,6 +167,10 @@ func (h *CarHandler) UpdateCar(w http.ResponseWriter, r *http.Request) {
 
 	// write the response body
 	_, err = w.Write(responseBody)
+	if err != nil {
+		log.Println("Error writing response body: ", err)
+		return
+	}
 }
 
 func (h *CarHandler) DeleteCar(w http.ResponseWriter, r *http.Request) {

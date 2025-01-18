@@ -24,8 +24,8 @@ func (s Store) GetCarById(ctx context.Context, id string) (models.Car, error) {
 
 	// using left join operator to get (RIGHT SIDE)engine details matching the cars we are querying
 	query := `
-		SELECT c.id, c.name, c.year, c.brand, c.fuel_type c.engine_id c.price, c.created_at
-		c.updated_at, e.id, e.displacement, e.no_of_cylinders, c.car_range 
+		SELECT c.id, c.name, c.year, c.brand, c.fuel_type, c.engine_id, c.price, c.created_at,
+		c.updated_at, e.id, e.displacement, e.no_of_cylinders, e.car_range 
 		FROM car c 
 		LEFT JOIN engine e 
 		ON c.engine_id = e.id 
@@ -68,7 +68,7 @@ func (s Store) GetCarByBrand(ctx context.Context, brand string, isEngine bool) (
 
 	if isEngine {
 		query = `
-			SELECT c.id, c.name, c.brand, c.fuel_type, c.engine_id, c.price
+			SELECT c.id, c.name, c.brand, c.fuel_type, c.engine_id, c.price,
 			c.created_at, c.updated_at, e.id, e.displacement, e.no_of_cylinders, e.car_range 
 			FROM car c 
 			LEFT JOIN engine e ON c.engine_id=e.id 
@@ -120,7 +120,7 @@ func (s Store) GetCarByBrand(ctx context.Context, brand string, isEngine bool) (
 				&car.Year,
 				&car.Brand,
 				&car.FuelType,
-				&car.Engine.EngineID,
+				// &car.Engine.EngineID,
 				&car.Price,
 				&car.CreatedAt,
 				&car.UpdatedAt,
@@ -194,7 +194,7 @@ func (s Store) CreateCar(ctx context.Context, carReq *models.CarRequest) (models
 
 	// insert car into the car table
 	query := `
-		INSERT INTO car (name, year, brand, fuel_type, engine_id, price, created_at, updated_at) 
+		INSERT INTO car (id, name, year, brand, fuel_type, engine_id, price, created_at, updated_at) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
 		RETURNING id, name, year, brand, fuel_type, engine_id, price, created_at, updated_at
 	`
@@ -247,7 +247,7 @@ func (s Store) UpdateCar(ctx context.Context, id string, carReq *models.CarReque
 
 	query := `
 		UPDATE car 
-		SET name=$2, year=$3, fuel_type=$5, engine_id=$6, price=$7, updated_at=$8 
+		SET name=$2, year=$3, brand = $4, fuel_type=$5, engine_id=$6, price=$7, updated_at=$8 
 		WHERE id=$1
 		RETURNING id, name, year, brand, fuel_type, engine_id, price, created_at, updated_at
 	`
@@ -297,7 +297,7 @@ func (s Store) DeleteCar(ctx context.Context, id string) (models.Car, error) {
 
 	tx.QueryRowContext(ctx,
 		`
-			SELECT id, name, year,brand, fuel_type, engine_id, price, created_at, updated_at
+			SELECT id, name, year, brand, fuel_type, engine_id, price, created_at, updated_at
 			FROM car 
 			WHERE id=$1
 		`,
