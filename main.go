@@ -29,6 +29,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	loginHandler "github.com/JulianaSau/carzone/handler/login"
 	middleware "github.com/JulianaSau/carzone/middleware"
 )
@@ -85,6 +87,8 @@ func main() {
 
 	// define routes
 	router.Use(otelmux.Middleware("carzone"))
+	router.Use(middleware.MetricsMiddleware)
+
 	router.HandleFunc("/api/v1/login", loginHandler.LoginHandler).Methods("POST")
 
 	// middleware
@@ -102,6 +106,9 @@ func main() {
 	protected.HandleFunc("/api/v1/engines", engineHandler.CreateEngine).Methods("POST")
 	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.UpdateEngine).Methods("PUT")
 	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.DeleteEngine).Methods("DELETE")
+
+	// metrics
+	router.Handle("/metrics", promhttp.Handler())
 
 	// start the server
 	port := os.Getenv("PORT")

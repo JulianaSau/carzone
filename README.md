@@ -21,3 +21,12 @@ go get go.opentelemetry.io/otel/exporters/otlp/otlptrace
 go get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp
 go get go.opentelemetry.io/otel/sdk
 ```
+
+# Prometheus Go Packages
+## Installation
+To install the necessary packages, use the following commands:
+
+```bash
+go get github.com/prometheus/client_golang/prometheus/promhttp
+go get github.com/prometheus/client_golang/prometheus/
+```

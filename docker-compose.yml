@@ -15,6 +15,8 @@ services:
     #   - .:/code
     depends_on:
       - db
+      - jaeger
+      - prometheus
   db:
     build:
       context: db
@@ -34,10 +36,34 @@ services:
       - "6831:6831/udp" # for Jaeger-Client
       - "4318:4318" # for Jaeger-Client
       - "14268:14268" # for Jaeger-Client
-    environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    # environment:
+    #   COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    # depends_on:
+    #   - db
+  
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    # command:
+    #   - '--config.file=/etc/prometheus/prometheus.yml'
+    # depends_on:
+    #   - app
+  
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
     depends_on:
-      - db
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
   
 volumes:
-  postgres_data: 
+  postgres_data:
+  grafana_data: 
