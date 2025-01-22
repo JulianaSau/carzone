@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/JulianaSau/carzone/driver"
 	carHandler "github.com/JulianaSau/carzone/handler/car"
@@ -16,9 +18,19 @@ import (
 	engineService "github.com/JulianaSau/carzone/service/engine"
 	carStore "github.com/JulianaSau/carzone/store/car"
 	engineStore "github.com/JulianaSau/carzone/store/engine"
-	"github.com/gorilla/mux"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+
+	loginHandler "github.com/JulianaSau/carzone/handler/login"
+	middleware "github.com/JulianaSau/carzone/middleware"
 )
 
 func main() {
@@ -28,6 +40,21 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading.env file")
 	}
+
+	// start tracing
+	traceProvider, err := startTracing()
+	if err != nil {
+		log.Fatalf("failed to start tracing: %v", err)
+	}
+
+	// shutdown the trace provider
+	defer func() {
+		if err := traceProvider.Shutdown(context.Background()); err != nil {
+			log.Fatalf("failed to shutdown trace provider: %v", err)
+		}
+	}()
+
+	otel.SetTracerProvider(traceProvider)
 
 	driver.InitDB()
 	defer driver.CloseDB()
@@ -57,16 +84,24 @@ func main() {
 	// }
 
 	// define routes
-	router.HandleFunc("/api/v1/cars/{id}", carHandler.GetCarById).Methods("GET")
-	router.HandleFunc("/api/v1/cars", carHandler.GetCarByBrand).Methods("GET")
-	router.HandleFunc("/api/v1/cars", carHandler.CreateCar).Methods("POST")
-	router.HandleFunc("/api/v1/cars/{id}", carHandler.UpdateCar).Methods("PUT")
-	router.HandleFunc("/api/v1/cars/{id}", carHandler.DeleteCar).Methods("DELETE")
+	router.Use(otelmux.Middleware("carzone"))
+	router.HandleFunc("/api/v1/login", loginHandler.LoginHandler).Methods("POST")
 
-	router.HandleFunc("/api/v1/engines/{id}", engineHandler.GetEngineById).Methods("GET")
-	router.HandleFunc("/api/v1/engines", engineHandler.CreateEngine).Methods("POST")
-	router.HandleFunc("/api/v1/engines/{id}", engineHandler.UpdateEngine).Methods("PUT")
-	router.HandleFunc("/api/v1/engines/{id}", engineHandler.DeleteEngine).Methods("DELETE")
+	// middleware
+	protected := router.PathPrefix("/").Subrouter()
+	protected.Use(middleware.AuthMIddleware)
+	// router.Use(middleware.AuthMIddleware)
+
+	protected.HandleFunc("/api/v1/cars/{id}", carHandler.GetCarById).Methods("GET")
+	protected.HandleFunc("/api/v1/cars", carHandler.GetCarByBrand).Methods("GET")
+	protected.HandleFunc("/api/v1/cars", carHandler.CreateCar).Methods("POST")
+	protected.HandleFunc("/api/v1/cars/{id}", carHandler.UpdateCar).Methods("PUT")
+	protected.HandleFunc("/api/v1/cars/{id}", carHandler.DeleteCar).Methods("DELETE")
+
+	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.GetEngineById).Methods("GET")
+	protected.HandleFunc("/api/v1/engines", engineHandler.CreateEngine).Methods("POST")
+	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.UpdateEngine).Methods("PUT")
+	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.DeleteEngine).Methods("DELETE")
 
 	// start the server
 	port := os.Getenv("PORT")
@@ -104,4 +139,40 @@ func executeSchemaFile(db *sql.DB, fileName string) error {
 
 	log.Printf("Successfully executed schema file: %s", schemaPath)
 	return nil
+}
+
+func startTracing() (*trace.TracerProvider, error) {
+	header := map[string]string{
+		"Content-Type": "application/json",
+	}
+
+	// http exporter that will send data to Jaeggar
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracehttp.NewClient(
+			otlptracehttp.WithEndpoint("jaeger:4318"),
+			otlptracehttp.WithHeaders(header),
+			otlptracehttp.WithInsecure(),
+		),
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new Jaeger exporter: %w", err)
+	}
+
+	// create a new trace provider
+	tracerProvider := trace.NewTracerProvider(
+		trace.WithBatcher(
+			exporter,
+			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
+			trace.WithBatchTimeout(trace.DefaultScheduleDelay*time.Millisecond),
+		),
+		trace.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String("carzone"),
+			),
+		),
+	)
+	return tracerProvider, nil
 }

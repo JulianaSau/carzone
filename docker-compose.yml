@@ -9,6 +9,8 @@ services:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       DB_NAME: postgres
+      JAEGER_AGENT_HOST: jaeger
+      JAEGER_AGENT_PORT: 4318
     # volumes:
     #   - .:/code
     depends_on:
@@ -25,6 +27,17 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686" # for Jaeger-UI
+      - "6831:6831/udp" # for Jaeger-Client
+      - "4318:4318" # for Jaeger-Client
+      - "14268:14268" # for Jaeger-Client
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    depends_on:
+      - db
   
 volumes:
   postgres_data: 

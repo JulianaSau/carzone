@@ -5,6 +5,7 @@ import (
 
 	"github.com/JulianaSau/carzone/models"
 	"github.com/JulianaSau/carzone/store"
+	"go.opentelemetry.io/otel"
 )
 
 // holds reference to the car interface
@@ -20,6 +21,10 @@ func NewCarService(store store.CarStoreInterface) *CarService {
 }
 
 func (s *CarService) GetCarById(ctx context.Context, id string) (*models.Car, error) {
+	tracer := otel.Tracer("CarService")
+	ctx, span := tracer.Start(ctx, "GetCarById-Service")
+	defer span.End()
+
 	car, err := s.store.GetCarById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -28,6 +33,10 @@ func (s *CarService) GetCarById(ctx context.Context, id string) (*models.Car, er
 }
 
 func (s *CarService) GetCarByBrand(ctx context.Context, brand string, isEngine bool) ([]models.Car, error) {
+	tracer := otel.Tracer("CarService")
+	ctx, span := tracer.Start(ctx, "GetCarByBrand-Service")
+	defer span.End()
+
 	cars, err := s.store.GetCarByBrand(ctx, brand, isEngine)
 	if err != nil {
 		return nil, err
@@ -36,6 +45,10 @@ func (s *CarService) GetCarByBrand(ctx context.Context, brand string, isEngine b
 }
 
 func (s *CarService) CreateCar(ctx context.Context, carReq *models.CarRequest) (*models.Car, error) {
+	tracer := otel.Tracer("CarService")
+	ctx, span := tracer.Start(ctx, "CreateCar-Service")
+	defer span.End()
+
 	if err := models.ValidateRequest(*carReq); err != nil {
 		return nil, err
 	}
@@ -48,6 +61,9 @@ func (s *CarService) CreateCar(ctx context.Context, carReq *models.CarRequest) (
 }
 
 func (s *CarService) UpdateCar(ctx context.Context, id string, carReq *models.CarRequest) (*models.Car, error) {
+	tracer := otel.Tracer("CarService")
+	ctx, span := tracer.Start(ctx, "UpdateCar-Service")
+	defer span.End()
 	if err := models.ValidateRequest(*carReq); err != nil {
 		return nil, err
 	}
@@ -60,6 +76,10 @@ func (s *CarService) UpdateCar(ctx context.Context, id string, carReq *models.Ca
 }
 
 func (s *CarService) DeleteCar(ctx context.Context, id string) (*models.Car, error) {
+	tracer := otel.Tracer("CarService")
+	ctx, span := tracer.Start(ctx, "DeleteCar-Service")
+	defer span.End()
+
 	deletedCar, err := s.store.DeleteCar(ctx, id)
 	if err != nil {
 		return nil, err
