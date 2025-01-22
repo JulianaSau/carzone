@@ -30,3 +30,9 @@ To install the necessary packages, use the following commands:
 go get github.com/prometheus/client_golang/prometheus/promhttp
 go get github.com/prometheus/client_golang/prometheus/
 ```
+
+### Grafana error solution: 
+```
+Error reading Prometheus: Post "http://localhost:9090/api/v1/query": dial tcp 127.0.0.1:9090: connect: connection refused
+```
+- Solution: https://github.com/grafana/grafana/issues/46434
