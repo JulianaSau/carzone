@@ -14,10 +14,13 @@ import (
 	"github.com/JulianaSau/carzone/driver"
 	carHandler "github.com/JulianaSau/carzone/handler/car"
 	engineHandler "github.com/JulianaSau/carzone/handler/engine"
+	userHandler "github.com/JulianaSau/carzone/handler/user"
 	carService "github.com/JulianaSau/carzone/service/car"
 	engineService "github.com/JulianaSau/carzone/service/engine"
+	userService "github.com/JulianaSau/carzone/service/user"
 	carStore "github.com/JulianaSau/carzone/store/car"
 	engineStore "github.com/JulianaSau/carzone/store/engine"
+	userStore "github.com/JulianaSau/carzone/store/user"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -94,13 +97,17 @@ func main() {
 	engineStore := engineStore.New(db)
 	engineService := engineService.NewEngineService(engineStore)
 
+	userStore := userStore.New(db)
+	userService := userService.NewUserService(userStore)
+
 	carHandler := carHandler.NewCarHandler(carService)
 	engineHandler := engineHandler.NewEngineHandler(engineService)
+	userHandler := userHandler.NewUserHandler(userService)
 
 	// initialise router
 	router := mux.NewRouter()
 
-	// execute schema file to populate database
+	// // execute schema file to populate database
 	// schemaFile := "store/schema.sql"
 	// if err := executeSchemaFile(db, schemaFile); err != nil {
 	// 	log.Fatalf("Error while executing schema file: %v", err)
@@ -119,6 +126,14 @@ func main() {
 	protected := router.PathPrefix("/").Subrouter()
 	protected.Use(middleware.AuthMIddleware)
 	// router.Use(middleware.AuthMIddleware)
+
+	protected.HandleFunc("/api/v1/users", userHandler.GetUsers).Methods("GET")
+	protected.HandleFunc("/api/v1/users/{id}", userHandler.GetUserProfile).Methods("GET")
+	protected.HandleFunc("/api/v1/users", userHandler.CreateUser).Methods("POST")
+	protected.HandleFunc("/api/v1/users/{id}", userHandler.UpdateUserProfile).Methods("PUT")
+	protected.HandleFunc("/api/v1/users/{id}/update-password", userHandler.UpdateUserPassword).Methods("PUT")
+	protected.HandleFunc("/api/v1/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+	protected.HandleFunc("/api/v1/users/{id}/toggle-status", userHandler.ToggleUserStatus).Methods("PUT")
 
 	protected.HandleFunc("/api/v1/cars/{id}", carHandler.GetCarById).Methods("GET")
 	protected.HandleFunc("/api/v1/cars", carHandler.GetCarByBrand).Methods("GET")

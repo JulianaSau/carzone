@@ -20,3 +20,13 @@ type EngineStoreInterface interface {
 	UpdateEngine(ctx context.Context, id string, engineReq *models.EngineRequest) (models.Engine, error)
 	DeleteEngine(ctx context.Context, id string) (models.Engine, error)
 }
+
+type UserStoreInterface interface {
+	GetUserProfile(ctx context.Context, id string) (models.User, error)
+	CreateUser(ctx context.Context, userReq *models.UserRequest) (models.User, error)
+	UpdateUserProfile(ctx context.Context, id string, userReq *models.UserRequest) (models.User, error)
+	UpdateUserPassword(ctx context.Context, id string, userReq *models.UpdatePasswordRequest) (models.User, error)
+	DeleteUser(ctx context.Context, id string) (models.User, error)
+	ToggleUserStatus(ctx context.Context, id string, active bool) (models.User, error)
+	GetUsers(ctx context.Context) ([]models.User, error)
+}

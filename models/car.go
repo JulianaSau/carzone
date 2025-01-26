@@ -9,27 +9,37 @@ import (
 )
 
 type Car struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Year      string    `json:"year"`
-	Brand     string    `json:"brand"`
-	FuelType  string    `json:"fuel_type"`
-	Engine    Engine    `json:"engine"`
-	Price     float64   `json:"price"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID                 uuid.UUID `json:"id"`
+	RegistrationNumber string    `json:"registration_number"`
+	Name               string    `json:"name"`
+	Year               string    `json:"year"`
+	Brand              string    `json:"brand"`
+	FuelType           string    `json:"fuel_type"`
+	Engine             Engine    `json:"engine"`
+	Price              float64   `json:"price"`
+	Status             string    `json:"status"`
+	CreatedBy          string    `json:"created_by"`
+	UpdatedBy          string    `json:"updated_by"`
+	DeletedAt          time.Time `json:"deleted_at"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
 }
 
 type CarRequest struct {
-	Name     string  `json:"name"`
-	Year     string  `json:"year"`
-	Brand    string  `json:"brand"`
-	FuelType string  `json:"fuel_type"`
-	Engine   Engine  `json:"engine"`
-	Price    float64 `json:"price"`
+	RegistrationNumber string  `json:"registration_number"`
+	Name               string  `json:"name"`
+	Year               string  `json:"year"`
+	Brand              string  `json:"brand"`
+	FuelType           string  `json:"fuel_type"`
+	Engine             Engine  `json:"engine"`
+	Status             string  `json:"status"`
+	Price              float64 `json:"price"`
 }
 
 func ValidateRequest(carReq CarRequest) error {
+	if err := validateRegistrationNumber(carReq.RegistrationNumber); err != nil {
+		return err
+	}
 	if err := validateName(carReq.Name); err != nil {
 		return err
 	}
@@ -40,6 +50,9 @@ func ValidateRequest(carReq CarRequest) error {
 		return err
 	}
 	if err := validateFuelType(carReq.FuelType); err != nil {
+		return err
+	}
+	if err := validateStatusType(carReq.Status); err != nil {
 		return err
 	}
 	if err := validateEngine(carReq.Engine); err != nil {
@@ -53,6 +66,12 @@ func ValidateRequest(carReq CarRequest) error {
 }
 
 // validator functions
+func validateRegistrationNumber(registration_number string) error {
+	if registration_number == "" {
+		return errors.New("registration number is required")
+	}
+	return nil
+}
 func validateName(name string) error {
 	if name == "" {
 		return errors.New("name is required")
@@ -96,6 +115,16 @@ func validateFuelType(fuelType string) error {
 		}
 	}
 	return errors.New("fuel type must be one of: Petrol, Diesel, Electric, or Hybrid")
+}
+
+func validateStatusType(status string) error {
+	validateStatusTypes := []string{"Available", "In Use", "Maintenance", "Decommissioned"}
+	for _, validType := range validateStatusTypes {
+		if status == validType {
+			return nil
+		}
+	}
+	return errors.New("status type must be one of: Available, In Use, Maintenance, or Decommissioned")
 }
 
 func validateEngine(engine Engine) error {
