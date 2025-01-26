@@ -7,6 +7,8 @@ ENV PROJECT_DIR=/app \
 
 # Basic setup of the container
 WORKDIR /app
+
+RUN mkdir "/build"
 # dummy module to make `go get` happy
 RUN go mod init dummy
 
@@ -16,4 +18,4 @@ RUN go install github.com/githubnemo/CompileDaemon
 
 # The build flag sets how to build after a change has been detected in the source code
 # The command flag sets how to run the app after it has been built
-ENTRYPOINT CompileDaemon -build="go build -o /app" -command="/app"
+ENTRYPOINT CompileDaemon -build="go build -o /app/build" -command="/app/build"

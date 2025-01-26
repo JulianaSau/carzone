@@ -41,3 +41,14 @@ type DriverStoreInterface interface {
 	SoftDeleteDriver(ctx context.Context, id string) (models.Driver, error)
 	ToggleDriverStatus(ctx context.Context, id string, active bool) (models.Driver, error)
 }
+
+type TripStoreInterface interface {
+	GetTrips(ctx context.Context) ([]models.Trip, error)
+	GetTripsByDriverID(ctx context.Context, id string) ([]models.Trip, error)
+	GetTripsByCarID(ctx context.Context, id string) ([]models.Trip, error)
+	GetTripById(ctx context.Context, id string) (models.Trip, error)
+	CreateTrip(ctx context.Context, tripReq *models.TripRequest) (models.Trip, error)
+	UpdateTrip(ctx context.Context, id string, tripReq *models.TripRequest) (models.Trip, error)
+	UpdateTripStatus(ctx context.Context, id string, status string) (models.Trip, error)
+	DeleteTrip(ctx context.Context, id string) (models.Trip, error)
+}

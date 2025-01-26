@@ -15,14 +15,17 @@ import (
 	carHandler "github.com/JulianaSau/carzone/handler/car"
 	driverHandler "github.com/JulianaSau/carzone/handler/driver"
 	engineHandler "github.com/JulianaSau/carzone/handler/engine"
+	tripHandler "github.com/JulianaSau/carzone/handler/trip"
 	userHandler "github.com/JulianaSau/carzone/handler/user"
 	carService "github.com/JulianaSau/carzone/service/car"
 	driverService "github.com/JulianaSau/carzone/service/driver"
 	engineService "github.com/JulianaSau/carzone/service/engine"
+	tripService "github.com/JulianaSau/carzone/service/trip"
 	userService "github.com/JulianaSau/carzone/service/user"
 	carStore "github.com/JulianaSau/carzone/store/car"
 	driverStore "github.com/JulianaSau/carzone/store/driver"
 	engineStore "github.com/JulianaSau/carzone/store/engine"
+	tripStore "github.com/JulianaSau/carzone/store/trip"
 	userStore "github.com/JulianaSau/carzone/store/user"
 
 	"github.com/gorilla/mux"
@@ -106,10 +109,14 @@ func main() {
 	driverStore := driverStore.New(db)
 	driverService := driverService.NewDriverService(driverStore)
 
+	tripStore := tripStore.New(db)
+	tripService := tripService.NewTripService(tripStore)
+
 	carHandler := carHandler.NewCarHandler(carService)
 	engineHandler := engineHandler.NewEngineHandler(engineService)
 	userHandler := userHandler.NewUserHandler(userService)
 	driverHandler := driverHandler.NewDriverHandler(driverService)
+	tripHandler := tripHandler.NewTripHandler(tripService)
 
 	// initialise router
 	router := mux.NewRouter()
@@ -162,6 +169,15 @@ func main() {
 	protected.HandleFunc("/api/v1/engines", engineHandler.CreateEngine).Methods("POST")
 	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.UpdateEngine).Methods("PUT")
 	protected.HandleFunc("/api/v1/engines/{id}", engineHandler.DeleteEngine).Methods("DELETE")
+
+	protected.HandleFunc("/api/v1/trips", tripHandler.GetTrips).Methods("GET")
+	protected.HandleFunc("/api/v1/trips/{id}", tripHandler.GetTripById).Methods("GET")
+	protected.HandleFunc("/api/v1/cars/{id}/trips", tripHandler.GetTripsByCarID).Methods("GET")
+	protected.HandleFunc("/api/v1/drivers/{id}/trips", tripHandler.GetTripsByDriverID).Methods("GET")
+	protected.HandleFunc("/api/v1/trips", tripHandler.CreateTrip).Methods("POST")
+	protected.HandleFunc("/api/v1/trips/{id}", tripHandler.UpdateTrip).Methods("PUT")
+	protected.HandleFunc("/api/v1/trips/{id}/update-status", tripHandler.UpdateTripStatus).Methods("PUT")
+	protected.HandleFunc("/api/v1/trips/{id}", tripHandler.DeleteTrip).Methods("DELETE")
 
 	// metrics
 	router.Handle("/metrics", promhttp.Handler())
