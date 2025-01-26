@@ -23,6 +23,19 @@ func NewEngineHandler(service service.EngineServiceInterface) *EngineHandler {
 	}
 }
 
+// GetEngineByIDHandler godoc
+// @Summary Get engine by ID
+// @Description Get engine by ID
+// @Tags Engine
+// @Accept json
+// @Produce json
+// @Param id path string true "Engine ID"
+// @Success 200 {object} models.Engine
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "Engine not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/engines/{id} [get]
+// @Security Bearer
 func (h *EngineHandler) GetEngineById(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("EngineHandler")
 	ctx, span := tracer.Start(r.Context(), "GetEngineById-Handler")
@@ -57,6 +70,18 @@ func (h *EngineHandler) GetEngineById(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CreateEngineHandler godoc
+// @Summary Create a new engine
+// @Description Create a new engine
+// @Tags Engine
+// @Accept json
+// @Produce json
+// @Param engine body models.EngineRequest true "Engine details"
+// @Success 201 {object} models.Engine
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/engines [post]
+// @Security Bearer
 func (h *EngineHandler) CreateEngine(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("EngineHandler")
 	ctx, span := tracer.Start(r.Context(), "CreateEngine-Handler")
@@ -104,6 +129,19 @@ func (h *EngineHandler) CreateEngine(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UpdateEngineHandler godoc
+// @Summary Update engine by ID
+// @Description Update engine by ID
+// @Tags Engine
+// @Accept json
+// @Produce json
+// @Param id path string true "Engine ID"
+// @Param engine body models.EngineRequest true "Engine details"
+// @Success 200 {object} models.Engine
+// @Failure 400 {string} string "Invalid ID or request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/engines/{id} [put]
+// @Security Bearer
 func (h *EngineHandler) UpdateEngine(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("EngineHandler")
 	ctx, span := tracer.Start(r.Context(), "UpdateEngine-Handler")
@@ -155,6 +193,18 @@ func (h *EngineHandler) UpdateEngine(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteEngineHandler godoc
+// @Summary Delete engine by ID
+// @Description Delete engine by ID
+// @Tags Engine
+// @Accept json
+// @Produce json
+// @Param id path string true "Engine ID"
+// @Success 200 {object} models.Engine
+// @Failure 404 {string} string "Engine not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/engines/{id} [delete]
+// @Security Bearer
 func (h *EngineHandler) DeleteEngine(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("EngineHandler")
 	ctx, span := tracer.Start(r.Context(), "DeleteEngine-Handler")

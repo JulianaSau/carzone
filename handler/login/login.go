@@ -10,6 +10,17 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// LoginHandler godoc
+// @Summary Authenticate user and generate a JWT token
+// @Description Validates user credentials and returns a JWT token on success
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param credentials body models.Credentials true "User credentials"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 401 {string} string "Invalid credentials"
+// @Router /api/v1/login [post]
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var credentials models.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {

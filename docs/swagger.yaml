@@ -1,0 +1,420 @@
+basePath: /
+definitions:
+  models.Car:
+    properties:
+      brand:
+        type: string
+      created_at:
+        type: string
+      engine:
+        $ref: '#/definitions/models.Engine'
+      fuel_type:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      updated_at:
+        type: string
+      year:
+        type: string
+    type: object
+  models.CarRequest:
+    properties:
+      brand:
+        type: string
+      engine:
+        $ref: '#/definitions/models.Engine'
+      fuel_type:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      year:
+        type: string
+    type: object
+  models.Credentials:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Engine:
+    properties:
+      car_range:
+        type: integer
+      displacement:
+        type: integer
+      engine_id:
+        type: string
+      no_of_cylinders:
+        type: integer
+    type: object
+  models.EngineRequest:
+    properties:
+      car_range:
+        type: integer
+      displacement:
+        type: integer
+      no_of_cylinders:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API documentation for the car management system.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Car Management System API
+  version: "1.0"
+paths:
+  /api/v1/cars:
+    get:
+      consumes:
+      - application/json
+      description: Get cars by brand
+      parameters:
+      - description: Car Brand
+        in: query
+        name: brand
+        required: true
+        type: string
+      - description: Car with Engine
+        in: query
+        name: isEngine
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Car'
+            type: array
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Car not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get cars by brand
+      tags:
+      - Car
+    post:
+      consumes:
+      - application/json
+      description: Create a new car
+      parameters:
+      - description: Car Request
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/models.CarRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Car'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Create a new car
+      tags:
+      - Car
+  /api/v1/cars/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a car
+      parameters:
+      - description: Car ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Car'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Delete a car
+      tags:
+      - Car
+    get:
+      consumes:
+      - application/json
+      description: Get a car by its ID
+      parameters:
+      - description: Car ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Car'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Car not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get car by ID
+      tags:
+      - Car
+    put:
+      consumes:
+      - application/json
+      description: Update a car
+      parameters:
+      - description: Car ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Car Request
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/models.CarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Car'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Update a car
+      tags:
+      - Car
+  /api/v1/engines:
+    post:
+      consumes:
+      - application/json
+      description: Create a new engine
+      parameters:
+      - description: Engine details
+        in: body
+        name: engine
+        required: true
+        schema:
+          $ref: '#/definitions/models.EngineRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Engine'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Create a new engine
+      tags:
+      - Engine
+  /api/v1/engines/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete engine by ID
+      parameters:
+      - description: Engine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Engine'
+        "404":
+          description: Engine not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Delete engine by ID
+      tags:
+      - Engine
+    get:
+      consumes:
+      - application/json
+      description: Get engine by ID
+      parameters:
+      - description: Engine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Engine'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Engine not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get engine by ID
+      tags:
+      - Engine
+    put:
+      consumes:
+      - application/json
+      description: Update engine by ID
+      parameters:
+      - description: Engine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Engine details
+        in: body
+        name: engine
+        required: true
+        schema:
+          $ref: '#/definitions/models.EngineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Engine'
+        "400":
+          description: Invalid ID or request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Update engine by ID
+      tags:
+      - Engine
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Validates user credentials and returns a JWT token on success
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Invalid credentials
+          schema:
+            type: string
+      summary: Authenticate user and generate a JWT token
+      tags:
+      - Authentication
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -22,6 +22,19 @@ func NewCarHandler(service service.CarServiceInterface) *CarHandler {
 	}
 }
 
+// GetCarByIDHandler godoc
+// @Summary Get car by ID
+// @Description Get a car by its ID
+// @Tags Car
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Car ID"
+// @Success 200 {object} models.Car
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "Car not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/cars/{id} [get]
+// @Security Bearer
 func (h *CarHandler) GetCarById(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("CarHandler")
 	ctx, span := tracer.Start(r.Context(), "GetCarById-Handler")
@@ -56,6 +69,20 @@ func (h *CarHandler) GetCarById(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetCarByBrandHandler godoc
+// @Summary Get cars by brand
+// @Description Get cars by brand
+// @Tags Car
+// @Accept  json
+// @Produce  json
+// @Param brand query string true "Car Brand"
+// @Param isEngine query boolean false "Car with Engine"
+// @Success 200 {object} []models.Car
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "Car not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/cars [get]
+// @Security Bearer
 func (h *CarHandler) GetCarByBrand(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("CarHandler")
 	ctx, span := tracer.Start(r.Context(), "GetCarByBrand-Handler")
@@ -89,6 +116,18 @@ func (h *CarHandler) GetCarByBrand(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CreateCarHandler godoc
+// @Summary Create a new car
+// @Description Create a new car
+// @Tags Car
+// @Accept  json
+// @Produce  json
+// @Param car body models.CarRequest true "Car Request"
+// @Success 201 {object} models.Car
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/cars [post]
+// @Security Bearer
 func (h *CarHandler) CreateCar(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("CarHandler")
 	ctx, span := tracer.Start(r.Context(), "CreateCar-Handler")
@@ -134,6 +173,19 @@ func (h *CarHandler) CreateCar(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UpdateCarHandler godoc
+// @Summary Update a car
+// @Description Update a car
+// @Tags Car
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Car ID"
+// @Param car body models.CarRequest true "Car Request"
+// @Success 200 {object} models.Car
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/cars/{id} [put]
+// @Security Bearer
 func (h *CarHandler) UpdateCar(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("CarHandler")
 	ctx, span := tracer.Start(r.Context(), "UpdateCar-Handler")
@@ -183,6 +235,17 @@ func (h *CarHandler) UpdateCar(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteCarHandler godoc
+// @Summary Delete a car
+// @Description Delete a car
+// @Tags Car
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Car ID"
+// @Success 200 {object} models.Car
+// @Failure 500 {string} string "Internal server error"
+// @Router /api/v1/cars/{id} [delete]
+// @Security Bearer
 func (h *CarHandler) DeleteCar(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("CarHandler")
 	ctx, span := tracer.Start(r.Context(), "DeleteCar-Handler")
