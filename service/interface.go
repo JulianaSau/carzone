@@ -29,4 +29,5 @@ type UserServiceInterface interface {
 	DeleteUser(ctx context.Context, id string) (*models.User, error)
 	ToggleUserStatus(ctx context.Context, id string, active bool) (*models.User, error)
 	GetUsers(ctx context.Context) ([]models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 }

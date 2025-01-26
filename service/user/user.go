@@ -111,3 +111,15 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) (*models.User, 
 	}
 	return &deletedUser, nil
 }
+
+func (s *UserService) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+	tracer := otel.Tracer("UserService")
+	ctx, span := tracer.Start(ctx, "GetUserByUsername-Service")
+	defer span.End()
+
+	user, err := s.store.GetUserByUsername(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

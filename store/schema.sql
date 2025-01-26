@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS "user" (
     phone_number VARCHAR(20),
     role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'manager', 'driver')),
     active BOOLEAN DEFAULT TRUE,
-    created_by VARCHAR(50) NULLABLE DEFAULT NULL,
-    deleted_at TIMESTAMP NULLABLE DEFAULT NULL,
+    created_by VARCHAR(50) DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -69,11 +69,11 @@ VALUES
     ('9746be12-07b7-42a3-b8ab-7d1f209b63d7', 1800, 4, 500);
 
 -- Insert dummy data into the user table
-INSERT INTO "user" (uuid, username, password, first_name, last_name, email, phone_number, role, created_by)
+INSERT INTO "user" (id, username, password, first_name, last_name, email, phone_number, role, created_by)
 VALUES
-    ('d3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b', 'admin', 'admin123', 'System', 'Admin', 'admin@carmanagement.com', '244707070707', 'admin', NULL),
-    ('e4c2f3a5-e5b2-4d5c-9b2e-5c2c2c2c2c2c', 'manager', 'manager123', 'System', 'Manager', 'manager@carmanagement.com', '244707070706', 'manager', NULL),
-    ('f5d3e4b6-f6c3-4e6d-ac3f-6d3d3d3d3d3d', 'driver', 'driver123', 'System', 'Driver', 'driver@carmanagement.com', '244707070708', 'driver', NULL);
+    ('d3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b', 'admin', 'admin123', 'System', 'Admin', 'admin@carmanagement.com', '244707070707', 'admin', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b'),
+    ('e4c2f3a5-e5b2-4d5c-9b2e-5c2c2c2c2c2c', 'manager', 'manager123', 'System', 'Manager', 'manager@carmanagement.com', '244707070706', 'manager', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b'),
+    ('f5d3e4b6-f6c3-4e6d-ac3f-6d3d3d3d3d3d', 'driver', 'driver123', 'System', 'Driver', 'driver@carmanagement.com', '244707070708', 'driver', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b');
 
 -- Insert dummy data into the car table
 INSERT INTO car (id, registration_number, name, year, brand, fuel_type, engine_id, status, price)

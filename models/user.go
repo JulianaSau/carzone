@@ -24,17 +24,16 @@ type User struct {
 }
 
 type UserRequest struct {
-	UserName        string    `json:"username"`
-	Password        string    `json:"password"`
-	ConfirmPassword string    `json:"confirm_password"`
-	FirstName       string    `json:"first_name"`
-	LastName        string    `json:"last_name"`
-	Email           string    `json:"email"`
-	PhoneNumber     string    `json:"phone_number"`
-	Role            string    `json:"role"`
-	ID              uuid.UUID `json:"uuid"`
+	UserName        string `json:"username"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	Email           string `json:"email"`
+	PhoneNumber     string `json:"phone_number"`
+	Role            string `json:"role"`
+	// ID              uuid.UUID `json:"uuid"`
 }
-
 type UpdatePasswordRequest struct {
 	PreviousPassword string `json:"previous_password"`
 	Password         string `json:"password"`

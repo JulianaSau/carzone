@@ -28,8 +28,8 @@ func (u UserStore) GetUsers(ctx context.Context) ([]models.User, error) {
 	users := []models.User{}
 
 	query := `
-		SELECT username, first_name, last_name, email, phone_number, role, uuid, active, created_by, created_at, updated_at
-		FROM user
+		SELECT username, first_name, last_name, email, phone_number, role, id, active, created_at, updated_at
+		FROM "user"
 	`
 	rows, err := u.db.QueryContext(ctx, query)
 	if err != nil {
@@ -48,7 +48,7 @@ func (u UserStore) GetUsers(ctx context.Context) ([]models.User, error) {
 			&user.Role,
 			&user.ID,
 			&user.Active,
-			&user.CreatedBy,
+			// &user.CreatedBy,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		)
@@ -95,9 +95,9 @@ func (u UserStore) CreateUser(ctx context.Context, userReq *models.UserRequest) 
 
 	// Insert user into the database
 	query := `
-		INSERT INTO user (id, username, password, first_name, last_name, email, phone_number, role, active, created_by, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-		RETURNING uuid
+		INSERT INTO "user" (id, username, password, first_name, last_name, email, phone_number, role, active, created_by, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		RETURNING id, username, first_name, last_name, email, phone_number, role, active, created_at, updated_at
 	`
 	userID := uuid.New()
 	_, err = tx.ExecContext(ctx, query,
@@ -166,9 +166,9 @@ func (u UserStore) UpdateUserProfile(ctx context.Context, id string, userReq *mo
 
 	// Update user profile in the database
 	query := `
-		UPDATE user
+		UPDATE "user"
 		SET first_name = $1, last_name = $2, username = $3, email = $4, phone_number = $5, updated_at = $6
-		WHERE uuid = $6
+		WHERE id = $6
 	`
 	results, err := tx.ExecContext(ctx, query,
 		userReq.FirstName,
@@ -244,9 +244,9 @@ func (u UserStore) UpdateUserPassword(ctx context.Context, id string, userReq *m
 
 	// Update user password in the database
 	query := `
-		UPDATE user
+		UPDATE "user"
 		SET password = $1, updated_at = $2
-		WHERE uuid = $3
+		WHERE id = $3
 	`
 	results, err := tx.ExecContext(ctx, query,
 		userReq.Password,
@@ -288,8 +288,8 @@ func (u UserStore) GetUserProfile(ctx context.Context, id string) (models.User, 
 	// Query the database
 	query := `
 		SELECT username, first_name, last_name, email, phone_number, role, uuid, active, created_by, created_at, updated_at
-		FROM user
-		WHERE uuid = $1
+		FROM "user"
+		WHERE id = $1
 	`
 	row := u.db.QueryRowContext(ctx, query, userID)
 
@@ -345,9 +345,9 @@ func (u UserStore) ToggleUserStatus(ctx context.Context, id string, active bool)
 	}()
 
 	query := `
-	    UPDATE user
+	    UPDATE "user"
 		SET active = $1, updated_at = $2
-		WHERE uuid = $3
+		WHERE id = $3
 	`
 	results, err := tx.ExecContext(ctx, query,
 		active,
@@ -408,7 +408,7 @@ func (u UserStore) DeleteUser(ctx context.Context, id string) (models.User, erro
 	}()
 
 	// check if the user exists
-	err = tx.QueryRowContext(ctx, `SELECT id, username FROM user WHERE id = $1`, userID).Scan()
+	err = tx.QueryRowContext(ctx, `SELECT id, username FROM "user" WHERE id = $1`, userID).Scan()
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -418,7 +418,7 @@ func (u UserStore) DeleteUser(ctx context.Context, id string) (models.User, erro
 	}
 
 	query := `
-		DELETE FROM user
+		DELETE FROM "user"
 		WHERE id = $1`
 
 	results, err := tx.ExecContext(ctx, query, userID)
@@ -437,6 +437,50 @@ func (u UserStore) DeleteUser(ctx context.Context, id string) (models.User, erro
 	user := models.User{
 		ID:        userID,
 		CreatedAt: time.Now(),
+	}
+
+	return user, nil
+}
+
+func (u UserStore) GetUserByUsername(ctx context.Context, username string) (models.User, error) {
+	tracer := otel.Tracer("UserStore")
+	ctx, span := tracer.Start(ctx, "GetUserProfile-Store")
+	defer span.End()
+
+	// Parse the user name
+	// _, err := uuid.Parse(username)
+	// if err != nil {
+	// 	return models.User{}, fmt.Errorf("invalid User ID : %w", err)
+	// }
+
+	// Prepare the SQL query to find a user by username
+	query := `
+		SELECT id, username, password, first_name, last_name, email, phone_number, role, active, created_at, updated_at
+		FROM "user"
+		WHERE username = $1 AND deleted_at IS NULL
+	`
+	row := u.db.QueryRowContext(ctx, query, username)
+
+	user := models.User{}
+	err := row.Scan(
+		&user.ID,
+		&user.UserName,
+		&user.Password,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.Role,
+		&user.Active,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return models.User{}, nil
+	}
+
+	if err != nil {
+		return models.User{}, err
 	}
 
 	return user, nil

@@ -1,15 +1,16 @@
 package login
 
 import (
-	"database/sql"
+	// "database/sql"
 	"encoding/json"
-	"errors"
+	// "errors"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/JulianaSau/carzone/driver"
+	// "github.com/JulianaSau/carzone/driver"
 	"github.com/JulianaSau/carzone/models"
+	userService "github.com/JulianaSau/carzone/service/user"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -24,7 +25,7 @@ import (
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 401 {string} string "Invalid credentials"
 // @Router /api/v1/login [post]
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request, userService *userService.UserService) {
 	var credentials models.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
@@ -41,13 +42,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	// Get the user from the database by username
-	user, err := getUserByUsername(credentials.UserName)
+	// call GetUserByUsername service from user service
+
+	user, err := userService.GetUserByUsername(r.Context(), credentials.UserName)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		log.Println("Error fetching user: ", err)
 		return
 	}
+
+	// print user information
+	log.Println("User: ", user)
 
 	// Check if the password is correct
 	if err := user.CheckPassword(credentials.Password); err != nil {
@@ -93,45 +98,3 @@ func GenerateToken(username string) (string, error) {
 
 	return signedToken, nil
 }
-
-// getUserByUsername retrieves a user from the database based on the username.
-func getUserByUsername(username string) (*models.User, error) {
-	// Prepare the SQL query to find a user by username
-	query := `
-		SELECT username, password, first_name, last_name, email, phone_number, role, id, active, created_at, updated_at
-		FROM "user"
-		WHERE username = $1
-	`
-	var user models.User
-
-	// Use the database connection to query the database
-	err := driver.GetDB().QueryRow(query, username).Scan(
-		&user.UserName,
-		&user.Password,
-		&user.FirstName,
-		&user.LastName,
-		&user.Email,
-		&user.PhoneNumber,
-		&user.Role,
-		&user.ID,
-		&user.Active,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
-
-	// If no rows are found, return an error indicating that the user does not exist
-	if err == sql.ErrNoRows {
-		return nil, errors.New("user not found")
-	}
-
-	// Log any other error that occurs during the query
-	if err != nil {
-		log.Println("Error retrieving user:", err)
-		return nil, err
-	}
-
-	// Return the user object
-	return &user, nil
-}
-
-// getUserByUsername retrieves a user from the database based on the username.

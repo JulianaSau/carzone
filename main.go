@@ -117,7 +117,9 @@ func main() {
 	router.Use(otelmux.Middleware("carzone"))
 	router.Use(middleware.MetricsMiddleware)
 
-	router.HandleFunc("/api/v1/login", loginHandler.LoginHandler).Methods("POST")
+	router.HandleFunc("/api/v1/login", func(w http.ResponseWriter, r *http.Request) {
+		loginHandler.LoginHandler(w, r, userService)
+	}).Methods("POST")
 
 	// Swagger documentation route
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
