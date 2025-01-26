@@ -31,3 +31,13 @@ type UserStoreInterface interface {
 	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserByUsername(ctx context.Context, username string) (models.User, error)
 }
+
+type DriverStoreInterface interface {
+	GetDrivers(ctx context.Context) ([]models.Driver, error)
+	GetDriverById(ctx context.Context, id string) (models.Driver, error)
+	CreateDriver(ctx context.Context, driverReq *models.DriverRequest) (models.Driver, error)
+	UpdateDriver(ctx context.Context, id string, driverReq *models.DriverUpdateRequest) (models.Driver, error)
+	DeleteDriver(ctx context.Context, id string) (models.Driver, error)
+	SoftDeleteDriver(ctx context.Context, id string) (models.Driver, error)
+	ToggleDriverStatus(ctx context.Context, id string, active bool) (models.Driver, error)
+}

@@ -13,12 +13,15 @@ import (
 
 	"github.com/JulianaSau/carzone/driver"
 	carHandler "github.com/JulianaSau/carzone/handler/car"
+	driverHandler "github.com/JulianaSau/carzone/handler/driver"
 	engineHandler "github.com/JulianaSau/carzone/handler/engine"
 	userHandler "github.com/JulianaSau/carzone/handler/user"
 	carService "github.com/JulianaSau/carzone/service/car"
+	driverService "github.com/JulianaSau/carzone/service/driver"
 	engineService "github.com/JulianaSau/carzone/service/engine"
 	userService "github.com/JulianaSau/carzone/service/user"
 	carStore "github.com/JulianaSau/carzone/store/car"
+	driverStore "github.com/JulianaSau/carzone/store/driver"
 	engineStore "github.com/JulianaSau/carzone/store/engine"
 	userStore "github.com/JulianaSau/carzone/store/user"
 
@@ -100,9 +103,13 @@ func main() {
 	userStore := userStore.New(db)
 	userService := userService.NewUserService(userStore)
 
+	driverStore := driverStore.New(db)
+	driverService := driverService.NewDriverService(driverStore)
+
 	carHandler := carHandler.NewCarHandler(carService)
 	engineHandler := engineHandler.NewEngineHandler(engineService)
 	userHandler := userHandler.NewUserHandler(userService)
+	driverHandler := driverHandler.NewDriverHandler(driverService)
 
 	// initialise router
 	router := mux.NewRouter()
@@ -136,6 +143,14 @@ func main() {
 	protected.HandleFunc("/api/v1/users/{id}/update-password", userHandler.UpdateUserPassword).Methods("PUT")
 	protected.HandleFunc("/api/v1/users/{id}", userHandler.DeleteUser).Methods("DELETE")
 	protected.HandleFunc("/api/v1/users/{id}/toggle-status", userHandler.ToggleUserStatus).Methods("PUT")
+
+	protected.HandleFunc("/api/v1/drivers", driverHandler.GetDrivers).Methods("GET")
+	protected.HandleFunc("/api/v1/drivers/{id}", driverHandler.GetDriverById).Methods("GET")
+	protected.HandleFunc("/api/v1/drivers", driverHandler.CreateDriver).Methods("POST")
+	protected.HandleFunc("/api/v1/drivers/{id}", driverHandler.UpdateDriver).Methods("PUT")
+	protected.HandleFunc("/api/v1/drivers/{id}/delete", driverHandler.DeleteDriver).Methods("DELETE")
+	protected.HandleFunc("/api/v1/drivers/{id}", driverHandler.SoftDeleteDriver).Methods("DELETE")
+	protected.HandleFunc("/api/v1/drivers/{id}/toggle-status", driverHandler.ToggleDriverStatus).Methods("PUT")
 
 	protected.HandleFunc("/api/v1/cars/{id}", carHandler.GetCarById).Methods("GET")
 	protected.HandleFunc("/api/v1/cars", carHandler.GetCarByBrand).Methods("GET")

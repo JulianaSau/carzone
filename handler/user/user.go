@@ -241,7 +241,7 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "User not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /api/v1/users/{id}/password [put]
+// @Router /api/v1/users/{id}/update-password [put]
 // @Security Bearer
 func (h *UserHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 
@@ -305,7 +305,7 @@ func (h *UserHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request)
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "User not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /api/v1/users/{id} [delete]
+// @Router /api/v1/users/{id}/delete [delete]
 // @Security Bearer
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("UserHandler")
@@ -354,7 +354,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "User not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /api/v1/users/{id}/status [put]
+// @Router /api/v1/users/{id}/toggle-status [put]
 // @Security Bearer
 func (h *UserHandler) ToggleUserStatus(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("UserHandler")

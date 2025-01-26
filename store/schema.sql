@@ -28,6 +28,21 @@ CREATE TABLE IF NOT EXISTS "user" (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- create driver table
+
+CREATE TABLE IF NOT EXISTS driver (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    license_number VARCHAR(255) UNIQUE NOT NULL,
+    license_expiry_date DATE NOT NULL,
+    active BOOLEAN DEFAULT TRUE,
+    created_by VARCHAR(50) DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
+);
+
 -- Create engine table
 CREATE TABLE IF NOT EXISTS engine (
     id UUID PRIMARY KEY,
@@ -71,9 +86,15 @@ VALUES
 -- Insert dummy data into the user table
 INSERT INTO "user" (id, username, password, first_name, last_name, email, phone_number, role, created_by)
 VALUES
-    ('d3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b', 'admin', 'admin123', 'System', 'Admin', 'admin@carmanagement.com', '244707070707', 'admin', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b'),
-    ('e4c2f3a5-e5b2-4d5c-9b2e-5c2c2c2c2c2c', 'manager', 'manager123', 'System', 'Manager', 'manager@carmanagement.com', '244707070706', 'manager', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b'),
-    ('f5d3e4b6-f6c3-4e6d-ac3f-6d3d3d3d3d3d', 'driver', 'driver123', 'System', 'Driver', 'driver@carmanagement.com', '244707070708', 'driver', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b');
+    ('d3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b', 'admin', '$2a$14$mvWNjPutN.zuLr9GyLft0uLOgZdX2msNBq2ELbExc9.bKi09dPXoC', 'System', 'Admin', 'admin@carmanagement.com', '244707070707', 'admin', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b'),
+    ('e4c2f3a5-e5b2-4d5c-9b2e-5c2c2c2c2c2c', 'manager', '$2a$14$mvWNjPutN.zuLr9GyLft0uLOgZdX2msNBq2ELbExc9.bKi09dPXoC', 'System', 'Manager', 'manager@carmanagement.com', '244707070706', 'manager', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b'),
+    ('f5d3e4b6-f6c3-4e6d-ac3f-6d3d3d3d3d3d', 'driver', '$2a$14$mvWNjPutN.zuLr9GyLft0uLOgZdX2msNBq2ELbExc9.bKi09dPXoC', 'System', 'Driver', 'driver@carmanagement.com', '244707070708', 'driver', 'd3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b');
+
+-- Insert dummy data into the driver table
+INSERT INTO driver (id, user_id, license_number, license_expiry_date)
+VALUES
+    ('d3b07384-d9a1-4c4b-8a0d-4b1b1b1b1b1b', 'f5d3e4b6-f6c3-4e6d-ac3f-6d3d3d3d3d3d', 'DL123456', '2025-12-31');
+
 
 -- Insert dummy data into the car table
 INSERT INTO car (id, registration_number, name, year, brand, fuel_type, engine_id, status, price)
