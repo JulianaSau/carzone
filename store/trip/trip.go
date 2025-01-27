@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/JulianaSau/carzone/middleware"
 	"github.com/JulianaSau/carzone/models"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
@@ -28,7 +29,7 @@ func (u TripStore) GetTrips(ctx context.Context) ([]models.Trip, error) {
 	trips := []models.Trip{}
 
 	query := `
-		SELECT id, description, driver_id, car_id, start_location, end_location, start_time, end_time, distance_km, fuel_consumed_liters, status, created_at, updated_at, created_by, updated_by
+		SELECT id, description, driver_id, car_id, start_location, end_location, start_time, distance_km, fuel_consumed_liters, status, created_at, updated_at
 		FROM trip
 	`
 	rows, err := u.db.QueryContext(ctx, query)
@@ -47,14 +48,14 @@ func (u TripStore) GetTrips(ctx context.Context) ([]models.Trip, error) {
 			&trip.StartLocation,
 			&trip.EndLocation,
 			&trip.StartTime,
-			&trip.EndTime,
+			// &trip.EndTime,
 			&trip.DistanceKM,
 			&trip.FuelConsumedLiters,
 			&trip.Status,
 			&trip.CreatedAt,
 			&trip.UpdatedAt,
-			&trip.CreatedBy,
-			&trip.UpdatedBy,
+			// &trip.CreatedBy,
+			// &trip.UpdatedBy,
 		)
 		if err != nil {
 			return nil, err
@@ -77,7 +78,7 @@ func (u TripStore) GetTripsByCarID(ctx context.Context, id string) ([]models.Tri
 	trips := []models.Trip{}
 
 	query := `
-		SELECT id, description, driver_id, car_id, start_location, end_location, start_time, end_time, distance_km, fuel_consumed_liters, status, created_at, updated_at, created_by, updated_by
+		SELECT id, description, driver_id, car_id, start_location, end_location, start_time, distance_km, fuel_consumed_liters, status, created_at, updated_at
 		FROM trip
 		WHERE car_id = $1
 	`
@@ -97,14 +98,14 @@ func (u TripStore) GetTripsByCarID(ctx context.Context, id string) ([]models.Tri
 			&trip.StartLocation,
 			&trip.EndLocation,
 			&trip.StartTime,
-			&trip.EndTime,
+			// &trip.EndTime,
 			&trip.DistanceKM,
 			&trip.FuelConsumedLiters,
 			&trip.Status,
 			&trip.CreatedAt,
 			&trip.UpdatedAt,
-			&trip.CreatedBy,
-			&trip.UpdatedBy,
+			// &trip.CreatedBy,
+			// &trip.UpdatedBy,
 		)
 		if err != nil {
 			return nil, err
@@ -127,7 +128,7 @@ func (u TripStore) GetTripsByDriverID(ctx context.Context, id string) ([]models.
 	trips := []models.Trip{}
 
 	query := `
-		SELECT id, description, driver_id, car_id, start_location, end_location, start_time, end_time, distance_km, fuel_consumed_liters, status, created_at, updated_at, created_by, updated_by
+		SELECT id, description, driver_id, car_id, start_location, end_location, start_time, distance_km, fuel_consumed_liters, status, created_at, updated_at
 		FROM trip
 		WHERE driver_id = $1
 	`
@@ -147,14 +148,14 @@ func (u TripStore) GetTripsByDriverID(ctx context.Context, id string) ([]models.
 			&trip.StartLocation,
 			&trip.EndLocation,
 			&trip.StartTime,
-			&trip.EndTime,
+			// &trip.EndTime,
 			&trip.DistanceKM,
 			&trip.FuelConsumedLiters,
 			&trip.Status,
 			&trip.CreatedAt,
 			&trip.UpdatedAt,
-			&trip.CreatedBy,
-			&trip.UpdatedBy,
+			// &trip.CreatedBy,
+			// &trip.UpdatedBy,
 		)
 		if err != nil {
 			return nil, err
@@ -191,7 +192,22 @@ func (e *TripStore) GetTripById(ctx context.Context, id string) (models.Trip, er
 	err = tx.QueryRowContext(ctx, `SELECT id, description, driver_id, car_id, start_location, end_location, start_time, end_time, distance_km, fuel_consumed_liters, status, created_at, updated_at, created_by, updated_by
 	from trip 
 	WHERE id=$1`,
-		id).Scan(&trip.ID)
+		id).Scan(&trip.ID,
+		&trip.Description,
+		&trip.DriverID,
+		&trip.CarID,
+		&trip.StartLocation,
+		&trip.EndLocation,
+		&trip.StartTime,
+		&trip.EndTime,
+		&trip.DistanceKM,
+		&trip.FuelConsumedLiters,
+		&trip.Status,
+		&trip.CreatedAt,
+		&trip.UpdatedAt,
+		&trip.CreatedBy,
+		&trip.UpdatedBy,
+	)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -350,6 +366,21 @@ func (e *TripStore) UpdateTripStatus(ctx context.Context, id string, status stri
 	ctx, span := tracer.Start(ctx, "UpdateTripStatus-Store")
 	defer span.End()
 
+	// get the trip details
+	trip, err := e.GetTripById(ctx, id)
+	if err != nil {
+		return models.Trip{}, err
+	}
+
+	// Record trip metrics
+
+	if status == "Completed" {
+		// fuelConsumed float64, distanceTraveled float64, tripDuration time.Duration
+		// calculate the trip duration
+		tripDuration := trip.EndTime.Sub(trip.StartTime)
+		middleware.RecordTripMetrics(trip.FuelConsumedLiters, trip.DistanceKM, tripDuration)
+	}
+
 	// Parse the trip ID
 	tripID, err := uuid.Parse(id)
 	if err != nil {
@@ -398,7 +429,7 @@ func (e *TripStore) UpdateTripStatus(ctx context.Context, id string, status stri
 	}
 
 	// Return the updated trip
-	trip := models.Trip{
+	trip = models.Trip{
 		ID:        tripID,
 		Status:    status,
 		UpdatedAt: time.Now(),

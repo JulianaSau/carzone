@@ -425,6 +425,41 @@ paths:
       summary: Update a car
       tags:
       - Car
+  /api/v1/cars/{id}/trips:
+    get:
+      consumes:
+      - application/json
+      description: Get trips by car ID
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Trip not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get trips by Car ID
+      tags:
+      - Trip
   /api/v1/drivers:
     get:
       consumes:
@@ -663,6 +698,41 @@ paths:
       summary: Toggle driver status
       tags:
       - Driver
+  /api/v1/drivers/{id}/trips:
+    get:
+      consumes:
+      - application/json
+      description: Get trips by Driver ID
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: Invalid Driver ID
+          schema:
+            type: string
+        "404":
+          description: Trips not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get trips by Driver ID
+      tags:
+      - Trip
   /api/v1/engines:
     post:
       consumes:
@@ -829,6 +899,28 @@ paths:
       tags:
       - Authentication
   /api/v1/trips:
+    get:
+      consumes:
+      - application/json
+      description: Get all trips
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Trip'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Get all trips
+      tags:
+      - Trip
     post:
       consumes:
       - application/json
@@ -957,11 +1049,11 @@ paths:
       summary: Update a trip
       tags:
       - Trip
-  /api/v1/trips/{id}/toggle-status:
+  /api/v1/trips/{id}/update-status:
     put:
       consumes:
       - application/json
-      description: Toggle trip status by ID
+      description: Update trip status by ID
       parameters:
       - description: Trip ID
         in: path
@@ -970,9 +1062,9 @@ paths:
         type: string
       - description: Active status
         in: query
-        name: active
+        name: status
         required: true
-        type: boolean
+        type: string
       produces:
       - application/json
       responses:
@@ -994,7 +1086,7 @@ paths:
             type: string
       security:
       - Bearer: []
-      summary: Toggle trip status
+      summary: Update trip status
       tags:
       - Trip
   /api/v1/users:

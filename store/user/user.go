@@ -287,7 +287,7 @@ func (u UserStore) GetUserProfile(ctx context.Context, id string) (models.User, 
 
 	// Query the database
 	query := `
-		SELECT username, first_name, last_name, email, phone_number, role, uuid, active, created_by, created_at, updated_at
+		SELECT username, first_name, last_name, email, phone_number, role, id, active, created_by, created_at, updated_at
 		FROM "user"
 		WHERE id = $1
 	`

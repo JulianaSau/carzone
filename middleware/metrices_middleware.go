@@ -33,6 +33,28 @@ var (
 		},
 		[]string{"method", "path", "status_code"},
 	)
+
+	fuelConsumedTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "fuel_consumed_liters_total",
+			Help: "Total fuel consumed across all trips.",
+		},
+	)
+
+	distanceTraveledTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "distance_traveled_km_total",
+			Help: "Total distance traveled across all trips in kilometers.",
+		},
+	)
+
+	averageTripDuration = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "trip_duration_seconds",
+			Help:    "Distribution of trip durations in seconds.",
+			Buckets: prometheus.DefBuckets,
+		},
+	)
 )
 
 type responseWriter struct {
@@ -41,7 +63,7 @@ type responseWriter struct {
 }
 
 func init() {
-	prometheus.MustRegister(requestCounter, requestDuration, statusCounter)
+	prometheus.MustRegister(requestCounter, requestDuration, statusCounter, fuelConsumedTotal, distanceTraveledTotal, averageTripDuration)
 }
 
 func MetricsMiddleware(next http.Handler) http.Handler {
@@ -61,12 +83,19 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 		// record the request
 		requestCounter.WithLabelValues(r.URL.Path, r.Method, http.StatusText(ww.statusCode)).Inc()
 
-		// // record the duration
+		// record the duration
 		requestDuration.WithLabelValues(r.URL.Path, r.Method).Observe(duration)
 
-		// // record the status code
+		// record the status code
 		statusCounter.WithLabelValues(r.URL.Path, r.Method, http.StatusText(ww.statusCode)).Inc()
+
 	})
+}
+
+func RecordTripMetrics(fuelConsumed float64, distanceTraveled float64, tripDuration time.Duration) {
+	fuelConsumedTotal.Add(fuelConsumed)
+	distanceTraveledTotal.Add(distanceTraveled)
+	averageTripDuration.Observe(tripDuration.Seconds())
 }
 
 func (rw *responseWriter) WriteHeader(statusCode int) {

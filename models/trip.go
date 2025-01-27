@@ -72,11 +72,11 @@ func ValidateTripRequest(tripReq TripRequest) error {
 }
 
 func validateTripStatus(status string) error {
-	validateTripTypes := []string{"Completed", "Scheduled", "Ongoing", "Cancelled", "Draft"}
+	validateTripTypes := []string{"Completed", "Scheduled", "In Progress", "Cancelled", "Draft"}
 	for _, validType := range validateTripTypes {
 		if status == validType {
 			return nil
 		}
 	}
-	return errors.New("status type must be one of: Completed, Scheduled, Ongoing, Cancelled, Draft")
+	return errors.New("status type must be one of: Completed, Scheduled, In Progress, Cancelled, Draft")
 }

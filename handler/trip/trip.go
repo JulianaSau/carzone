@@ -118,7 +118,7 @@ func (h *TripHandler) GetTripById(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Trip not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /api/v1/car/{id}/trips [get]
+// @Router /api/v1/cars/{id}/trips [get]
 // @Security Bearer
 func (h *TripHandler) GetTripsByCarID(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("TripHandler")
@@ -165,7 +165,7 @@ func (h *TripHandler) GetTripsByCarID(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Invalid Driver ID"
 // @Failure 404 {string} string "Trips not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /api/v1/driver/{id}/trips [get]
+// @Router /api/v1/drivers/{id}/trips [get]
 // @Security Bearer
 func (h *TripHandler) GetTripsByDriverID(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("TripHandler")
@@ -365,14 +365,14 @@ func (h *TripHandler) DeleteTrip(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ToggleTripStatusHandler godoc
-// @Summary Toggle trip status
-// @Description Toggle trip status by ID
+// UpdateTripStatusHandler godoc
+// @Summary Update trip status
+// @Description Update trip status by ID
 // @Tags Trip
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Trip ID"
-// @Param active query boolean true "Active status"
+// @Param status query string true "Active status"
 // @Success 200 {object} models.Trip
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Trip not found"

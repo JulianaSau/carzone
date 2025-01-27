@@ -289,6 +289,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/cars/{id}/trips": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get trips by car ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "Get trips by Car ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Trip not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/drivers": {
             "get": {
                 "security": [
@@ -662,6 +717,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/drivers/{id}/trips": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get trips by Driver ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "Get trips by Driver ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Driver ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Driver ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Trips not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/engines": {
             "post": {
                 "security": [
@@ -921,6 +1031,41 @@ const docTemplate = `{
             }
         },
         "/api/v1/trips": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all trips",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "Get all trips",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Trip"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1123,14 +1268,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/trips/{id}/toggle-status": {
+        "/api/v1/trips/{id}/update-status": {
             "put": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "Toggle trip status by ID",
+                "description": "Update trip status by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -1140,7 +1285,7 @@ const docTemplate = `{
                 "tags": [
                     "Trip"
                 ],
-                "summary": "Toggle trip status",
+                "summary": "Update trip status",
                 "parameters": [
                     {
                         "type": "string",
@@ -1150,9 +1295,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "boolean",
+                        "type": "string",
                         "description": "Active status",
-                        "name": "active",
+                        "name": "status",
                         "in": "query",
                         "required": true
                     }

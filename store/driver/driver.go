@@ -33,7 +33,7 @@ func (d DriverStore) GetDrivers(ctx context.Context) ([]models.Driver, error) {
 			d.created_at, d.updated_at, d.created_by, d.deleted_at,
 			u.id AS user_id, u.username, u.first_name, u.last_name, u.email
 		FROM driver d
-		JOIN user u ON d.user_id = u.id
+		JOIN user u ON d.user_id = user_id
 		WHERE d.deleted_at IS NULL
 	`
 	rows, err := d.db.QueryContext(ctx, query)
@@ -227,7 +227,7 @@ func (d DriverStore) GetDriverById(ctx context.Context, id string) (models.Drive
 			d.created_at, d.updated_at, d.created_by, d.deleted_at,
 			u.id AS user_id, u.username, u.first_name, u.last_name, u.email
 		FROM driver d
-		JOIN user u ON d.user_id = u.id
+		JOIN user u ON d.user_id = user_id
 		WHERE d.deleted_at IS NULL AND d.id = $1
 	`
 	row := d.db.QueryRowContext(ctx, query, driverID)
