@@ -78,7 +78,7 @@ func (d DriverStore) CreateDriver(ctx context.Context, driverReq *models.DriverR
 		ctx,
 		`
 				SELECT id 
-				FROM user 
+				FROM "user" 
 				WHERE id=$1
 			`,
 		driverReq.UserID,
@@ -110,9 +110,9 @@ func (d DriverStore) CreateDriver(ctx context.Context, driverReq *models.DriverR
 
 	// Insert driver into the database
 	query := `
-		INSERT INTO driver (id, user_id, driver_license_no, licence_expiry, active, created_by, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING uuid
+		INSERT INTO driver (id, user_id, driver_license_number, license_expiry, active, created_by, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, user_id, driver_license_number, license_expiry, created_by, created_at, updated_at
 	`
 	driverID := uuid.New()
 	_, err = tx.ExecContext(ctx, query,
